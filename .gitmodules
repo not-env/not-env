@@ -1,0 +1,15 @@
+[submodule "not-env-backend"]
+	path = not-env-backend
+	url = https://github.com/your-org/not-env-backend.git
+	branch = main
+
+[submodule "not-env-cli"]
+	path = not-env-cli
+	url = https://github.com/your-org/not-env-cli.git
+	branch = main
+
+[submodule "not-env-sdk-js"]
+	path = not-env-sdk-js
+	url = https://github.com/your-org/not-env-sdk-js.git
+	branch = main
+

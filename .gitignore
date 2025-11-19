@@ -1,0 +1,34 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+dist/
+build/
+bin/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Test artifacts
+*.test
+*.out
+coverage/
+
+# Environment
+.env
+.env.local
+*.log
+
