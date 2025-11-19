@@ -8,7 +8,7 @@ not-env consists of three components, each maintained as its own repository:
 
 1. **[not-env-backend](./not-env-backend)** - Go HTTP(S) API server with PostgreSQL, encryption, and horizontal scaling
 2. **[not-env-cli](./not-env-cli)** - Go CLI tool for managing environments and variables
-3. **[not-env-sdk-js](./not-env-sdk-js)** - JavaScript/TypeScript SDK that monkey-patches process.env
+3. **[not-env-sdk-js](./SDKs/not-env-sdk-js)** - JavaScript/TypeScript SDK that monkey-patches process.env
 
 > **Note:** This repository uses git submodules. See [SETUP.md](./SETUP.md) for instructions on cloning and working with submodules.
 
@@ -62,7 +62,7 @@ go build -o not-env
 ### 5. Use in Your Application
 
 ```bash
-cd ../not-env-sdk-js
+cd ../SDKs/not-env-sdk-js
 npm install
 npm run build
 
@@ -76,7 +76,7 @@ node --require not-env-sdk-js/register index.js
 
 - **[Backend](./not-env-backend/README.md)** - API server, database, encryption
 - **[CLI](./not-env-cli/README.md)** - Command-line interface for management
-- **[SDK](./not-env-sdk-js/README.md)** - JavaScript/TypeScript integration
+- **[SDK](./SDKs/not-env-sdk-js/README.md)** - JavaScript/TypeScript integration
 
 ## Features
 

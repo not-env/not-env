@@ -32,3 +32,8 @@ coverage/
 .env.local
 *.log
 
+# macOS
+**/.DS_Store
+
+data/**
+!data/.gitkeep

@@ -58,7 +58,7 @@ go test ./... -v
 
 ### ⚠️ SDK Tests - Logic Tests Available
 
-**Location:** `not-env-sdk-js/`
+**Location:** `SDKs/not-env-sdk-js/`
 
 **Test Files:**
 - `src/register.test.ts` - Core logic tests
@@ -71,7 +71,7 @@ go test ./... -v
 
 **Run tests:**
 ```bash
-cd not-env-sdk-js
+cd SDKs/not-env-sdk-js
 npm test
 ```
 
@@ -156,7 +156,7 @@ ok  	not-env-cli/internal/commands	0.309s
 
 ### SDK
 ```bash
-cd not-env-sdk-js
+cd SDKs/not-env-sdk-js
 npm test
 ```
 
@@ -206,7 +206,7 @@ go build -o not-env
 ./not-env env create --name test
 
 # 4. Test SDK
-cd ../not-env-sdk-js
+cd ../SDKs/not-env-sdk-js
 export NOT_ENV_URL="http://localhost:1212"
 export NOT_ENV_API_KEY="<env-read-only-key>"
 node --require dist/register.js test-app.js
