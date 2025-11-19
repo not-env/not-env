@@ -17,7 +17,7 @@ not-env consists of three components, each maintained as its own repository:
 ### 1. Clone the Repository
 
 ```bash
-git clone --recursive https://github.com/your-org/not-env.git
+git clone --recursive https://github.com/not-env/not-env.git
 cd not-env
 ```
 
