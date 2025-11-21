@@ -1,6 +1,46 @@
 # Testing
 
-This document describes the comprehensive test suite for not-env.
+This document describes the test suite for not-env.
+
+## Quick Start
+
+**Run all tests at once:**
+
+```bash
+./test-all.sh
+```
+
+This script automatically:
+- Verifies all builds (backend, CLI, SDKs)
+- Runs all unit tests
+- Provides a summary of results
+
+**Run with functional tests (requires Docker):**
+
+```bash
+./test-all.sh --functional
+```
+
+This includes end-to-end functional tests that verify:
+- `env import` outputs both keys correctly
+- Error messages show step-by-step instructions
+- SDK integration works
+
+**Run tests individually:**
+
+```bash
+# Backend
+cd not-env-backend && go test ./... -v
+
+# CLI
+cd not-env-cli && go test ./... -v
+
+# JavaScript SDK
+cd SDKs/not-env-sdk-js && npm test
+
+# Python SDK
+cd SDKs/not-env-sdk-python && pytest
+```
 
 ## Test Status Summary
 
@@ -56,7 +96,7 @@ go test ./... -v
 
 **Results:** All tests pass ✅
 
-### ⚠️ SDK Tests - Logic Tests Available
+### ⚠️ JavaScript SDK Tests - Logic Tests Available
 
 **Location:** `SDKs/not-env-sdk-js/`
 
@@ -77,52 +117,30 @@ npm test
 
 **Note:** SDK tests have a known issue with Node.js v25+ and Jest's localStorage initialization. The test logic is correct and tests pass on Node.js 18-20.
 
-## Test Details
+### ✅ Python SDK Tests - ALL PASSING
 
-### Backend Tests
+**Location:** `SDKs/not-env-sdk-python/`
 
-#### Crypto Tests (`internal/crypto/encryption_test.go`)
-- **TestGenerateDEK**: Verifies DEK generation produces unique 32-byte keys
-- **TestEncryptDecryptDEK**: Tests DEK encryption/decryption with master key
-- **TestEncryptDecryptValue**: Tests value encryption/decryption with DEK
-- **TestNewCrypto**: Tests crypto initialization with various master key scenarios
+**Test Files:**
+- `tests/test_register.py` - Core SDK functionality tests
 
-#### API Middleware Tests (`internal/api/middleware_test.go`)
-- **TestRequireAuth**: Tests authentication middleware with various header scenarios
-  - Missing Authorization header
-  - Invalid Authorization format
-  - Missing Bearer token
-  - Empty API key
-  - Invalid API key
-- **TestRequirePermission**: Tests permission checking
-  - No auth context
-  - Correct permission
-  - Wrong permission
-  - Multiple required types (match)
-- **TestGetAuthContext**: Tests auth context extraction
-- **TestRespondError**: Tests error response formatting
+**Coverage:**
+- ✅ URL parsing logic
+- ✅ JSON response parsing
+- ✅ os.environ patching behavior
+- ✅ Preserved variables (NOT_ENV_URL, NOT_ENV_API_KEY)
+- ✅ Hermetic behavior (KeyError for missing keys)
+- ✅ Dict-like behavior (keys(), in operator, etc.)
 
-### CLI Tests
+**Run tests:**
+```bash
+cd SDKs/not-env-sdk-python
+pytest
+```
 
-#### Config Tests (`internal/config/config_test.go`)
-- **TestConfigSaveLoad**: Verifies config can be saved and loaded correctly
-- **TestConfigLoadNotFound**: Tests error handling when config file doesn't exist
-- **TestConfigClear**: Tests config file removal
+**Results:** All tests pass ✅
 
-#### Client Tests (`internal/client/client_test.go`)
-- **TestClientGet**: Tests GET request with proper headers
-- **TestClientPost**: Tests POST request with JSON body
-- **TestParseResponse**: Tests response parsing for success and error cases
-
-#### Command Tests (`internal/commands/env_test.go`)
-- **TestEnvSetOutput**: Tests shell export format with various value types
-  - Simple values
-  - Values with quotes
-  - Values with dollar signs
-  - Values with backticks
-- **TestEnvClearOutput**: Tests shell unset format
-
-## Running All Tests
+## Running Tests
 
 ### Backend
 ```bash
@@ -130,13 +148,7 @@ cd not-env-backend
 go test ./... -v
 ```
 
-**Expected output:**
-```
-PASS
-ok  	not-env-backend/internal/crypto	0.294s
-PASS
-ok  	not-env-backend/internal/api	0.491s
-```
+**Coverage:** Crypto (encryption/decryption), middleware (auth/permissions)
 
 ### CLI
 ```bash
@@ -144,103 +156,85 @@ cd not-env-cli
 go test ./... -v
 ```
 
-**Expected output:**
-```
-PASS
-ok  	not-env-cli/internal/config	0.286s
-PASS
-ok  	not-env-cli/internal/client	0.338s
-PASS
-ok  	not-env-cli/internal/commands	0.309s
-```
+**Coverage:** Config management, HTTP client, command output formatting
 
-### SDK
+### JavaScript SDK
 ```bash
 cd SDKs/not-env-sdk-js
 npm test
 ```
 
-**Note:** Requires Node.js 18-20 due to Jest compatibility.
+**Note:** Requires Node.js 18-20 due to Jest compatibility with Node.js v25+.
 
-## Test Coverage
+**Coverage:** Proxy logic, URL/JSON parsing, preserved variables
 
-### Backend
-- ✅ **Crypto**: 100% of encryption functions tested
-- ✅ **Middleware**: All authentication and permission paths tested
-- ⚠️ **Handlers**: Logic tested via middleware, full integration requires running backend
-- ⚠️ **Database**: Schema and migrations tested via integration, unit tests use SQLite
+### Python SDK
+```bash
+cd SDKs/not-env-sdk-python
+pytest
+```
 
-### CLI
-- ✅ **Config**: All config operations tested
-- ✅ **Client**: All HTTP methods and error handling tested
-- ✅ **Commands**: Output format and escaping tested
-- ⚠️ **Full Commands**: End-to-end tests require running backend
-
-### SDK
-- ✅ **Core Logic**: All Proxy handler logic tested
-- ✅ **Parsing**: URL and JSON parsing tested
-- ⚠️ **Integration**: Full integration requires running backend and Node.js 18-20
+**Coverage:** os.environ patching, dict-like behavior, preserved variables
 
 ## Integration Testing
 
-For full integration testing, you need:
+### Automated Integration Tests
 
-1. **PostgreSQL database** running
-2. **Backend server** running with proper configuration
-3. **Test API keys** generated
+Two automated test scripts are available for comprehensive testing:
 
-Example integration test flow:
+**Graceful Shutdown Test:**
+```bash
+./test-graceful-shutdown.sh
+```
+
+Tests that the backend properly handles SIGTERM and shuts down gracefully.
+
+**End-to-End Integration Test:**
+```bash
+./test-integration.sh
+```
+
+Comprehensive test that verifies:
+- Backend startup and health checks
+- CLI authentication and commands
+- Environment and variable management
+- JavaScript SDK integration
+- Python SDK integration
+- CLI shell export functionality
+
+### Manual Integration Testing
+
+For manual end-to-end testing, start the backend and test each component:
 
 ```bash
 # 1. Start backend
-cd not-env-backend
-docker-compose up -d
+docker run -d --name not-env-backend -p 1212:1212 \
+  -v not-env-data:/data \
+  ghcr.io/not-env/not-env-standalone:latest
 
 # 2. Get APP_ADMIN key from logs
-docker-compose logs backend | grep "APP_ADMIN key"
+docker logs not-env-backend | grep "APP_ADMIN key"
 
 # 3. Test CLI
-cd ../not-env-cli
+cd not-env-cli
 go build -o not-env
 ./not-env login
 ./not-env env create --name test
 
-# 4. Test SDK
-cd ../SDKs/not-env-sdk-js
+# 4. Test JavaScript SDK
+cd SDKs/not-env-sdk-js
 export NOT_ENV_URL="http://localhost:1212"
 export NOT_ENV_API_KEY="<env-read-only-key>"
-node --require dist/register.js test-app.js
+node -e "require('not-env-sdk'); console.log(process.env)"
+
+# 5. Test Python SDK
+cd SDKs/not-env-sdk-python
+export NOT_ENV_URL="http://localhost:1212"
+export NOT_ENV_API_KEY="<env-read-only-key>"
+python -c "import not_env_sdk.register; import os; print(os.environ)"
 ```
-
-## Code Quality
-
-All tests follow Go and JavaScript best practices:
-- ✅ Table-driven tests where appropriate
-- ✅ Clear test names describing what is tested
-- ✅ Proper error handling and edge cases
-- ✅ Isolated tests (no shared state)
-- ✅ Fast execution (all tests complete in <1 second)
-
-## Future Test Improvements
-
-1. **Backend Handler Tests**: Add HTTP handler tests with httptest and mock database
-2. **CLI Integration Tests**: Add end-to-end CLI tests with mock backend server
-3. **SDK Integration Tests**: Add full integration tests with mock HTTP server
-4. **Database Tests**: Add tests with testcontainers for PostgreSQL
-5. **E2E Tests**: Add complete end-to-end tests for the full workflow
-6. **Performance Tests**: Add benchmarks for encryption and database operations
 
 ## Known Issues
 
-1. **SDK Jest Tests**: Node.js v25+ has compatibility issues with Jest's localStorage. Use Node.js 18-20 for running SDK tests, or wait for Jest updates.
-
-2. **Integration Tests**: Full integration tests require manual setup of backend and database. Consider using testcontainers for automated integration testing.
-
-3. **Handler Tests**: API handler tests would benefit from a test database setup. Currently tested via middleware tests and manual integration.
-
-## Test Maintenance
-
-- Tests are run as part of CI/CD (when configured)
-- All tests must pass before merging
-- New features require corresponding tests
-- Test coverage should be maintained or improved
+- **JavaScript SDK**: Node.js v25+ has Jest compatibility issues. Use Node.js 18-20 for tests.
+- **Integration Tests**: Require manual backend setup. Consider testcontainers for automation.

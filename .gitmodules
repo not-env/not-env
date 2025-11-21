@@ -12,6 +12,7 @@
 	path = SDKs/not-env-sdk-js
 	url = https://github.com/not-env/not-env-sdk-js.git
 	branch = main
+
 [submodule "SDKs/not-env-sdk-python"]
 	path = SDKs/not-env-sdk-python
 	url = https://github.com/not-env/not-env-sdk-python.git
