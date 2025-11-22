@@ -42,6 +42,80 @@ cd SDKs/not-env-sdk-js && npm test
 cd SDKs/not-env-sdk-python && pytest
 ```
 
+## Running All Automated Tests
+
+Three automated test scripts are available:
+
+### Comprehensive Test Suite (`test-all.sh`)
+
+Runs all builds and unit tests:
+
+```bash
+./test-all.sh
+```
+
+**What it tests:**
+- Backend build verification
+- CLI build verification
+- JavaScript SDK build verification
+- Python SDK compile verification
+- Backend unit tests
+- CLI unit tests
+- JavaScript SDK unit tests
+- Python SDK unit tests
+
+**Run with functional tests (requires Docker):**
+```bash
+./test-all.sh --functional
+```
+
+This includes end-to-end functional tests that verify:
+- `env import` outputs both keys correctly
+- Error messages show step-by-step instructions
+- SDK integration works
+
+### End-to-End Integration Test (`test-integration.sh`)
+
+Comprehensive test that verifies the entire not-env workflow:
+
+```bash
+./test-integration.sh
+```
+
+**Prerequisites:** Docker installed and running
+
+**What it tests:**
+- Backend startup and health checks
+- APP_ADMIN key retrieval from logs
+- CLI build and authentication
+- Environment creation via CLI
+- .env file import (creates environment and imports all variables)
+- Variable management via CLI (set/get) - both imported and manual
+- JavaScript SDK integration (fetches and uses variables)
+- Python SDK integration (fetches and uses variables)
+- CLI shell export functionality
+
+**Expected duration:** ~10-15 seconds
+
+### Graceful Shutdown Test (`test-graceful-shutdown.sh`)
+
+Tests that the backend properly handles SIGTERM and shuts down gracefully:
+
+```bash
+./test-graceful-shutdown.sh
+```
+
+**Prerequisites:** Docker installed and running
+
+**What it tests:**
+- Backend starts successfully
+- Server responds to health checks
+- SIGTERM signal triggers graceful shutdown
+- Shutdown messages appear in logs
+- Container exits cleanly (not killed)
+
+**Expected duration:** ~5 seconds
+
 ## Test Status Summary
 
 ### ✅ Backend Tests - ALL PASSING

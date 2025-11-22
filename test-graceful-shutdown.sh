@@ -13,20 +13,37 @@ docker rm -f not-env-test-shutdown 2>/dev/null || true
 # Start backend in background
 echo ""
 echo "Starting backend container..."
-docker run -d \
+CONTAINER_STARTED=false
+BUILT_IMAGE_ID=""
+
+if docker run -d \
   --name not-env-test-shutdown \
   -p 1213:1212 \
   -e DB_TYPE=sqlite \
   -e DB_PATH=/data/test.db \
   -v not-env-test-data:/data \
-  ghcr.io/not-env/not-env-standalone:latest 2>/dev/null || \
-docker run -d \
-  --name not-env-test-shutdown \
-  -p 1213:1212 \
-  -e DB_TYPE=sqlite \
-  -e DB_PATH=/data/test.db \
-  -v not-env-test-data:/data \
-  $(cd not-env-backend && docker build -f Dockerfile.sqlite -q .)
+  ghcr.io/not-env/not-env-standalone:latest 2>&1; then
+  sleep 1
+  if docker ps --format "{{.Names}}" | grep -q "^not-env-test-shutdown$"; then
+    CONTAINER_STARTED=true
+  else
+    docker rm -f not-env-test-shutdown > /dev/null 2>&1 || true
+  fi
+fi
+
+if [ "$CONTAINER_STARTED" != "true" ]; then
+  echo "Building backend image..."
+  cd not-env-backend
+  BUILT_IMAGE_ID=$(docker build -f Dockerfile.sqlite -q .)
+  cd ..
+  docker run -d \
+    --name not-env-test-shutdown \
+    -p 1213:1212 \
+    -e DB_TYPE=sqlite \
+    -e DB_PATH=/data/test.db \
+    -v not-env-test-data:/data \
+    ${BUILT_IMAGE_ID}
+fi
 
 # Wait for server to start
 echo "Waiting for server to start..."
@@ -75,6 +92,10 @@ fi
 
 # Cleanup
 docker rm -f not-env-test-shutdown 2>/dev/null || true
+# Clean up built image if it exists
+if [ -n "$BUILT_IMAGE_ID" ]; then
+  docker rmi ${BUILT_IMAGE_ID} > /dev/null 2>&1 || true
+fi
 
 echo ""
 echo "=========================================="
