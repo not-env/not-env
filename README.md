@@ -67,7 +67,9 @@ docker logs not-env 2>&1 | grep -A 1 "NOT_ENV_MASTER_KEY was auto-generated" | t
 
 Install CLI (one command):
 ```bash
-curl -L https://github.com/not-env/not-env-cli/releases/latest/download/not-env-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m) -o /usr/local/bin/not-env && chmod +x /usr/local/bin/not-env
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')
+curl -L https://github.com/not-env/not-env-cli/releases/latest/download/not-env-${OS}-${ARCH} -o not-env && chmod +x not-env
 ```
 
 Import your .env file (creates environment AND imports all variables):
