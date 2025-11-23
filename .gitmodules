@@ -17,6 +17,8 @@
 	path = SDKs/not-env-sdk-python
 	url = https://github.com/not-env/not-env-sdk-python.git
 	branch = main
+
 [submodule "not-env-frontend"]
 	path = not-env-frontend
 	url = git@github.com:not-env/not-env-frontend.git
+	branch = main
