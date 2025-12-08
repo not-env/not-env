@@ -181,7 +181,7 @@ go test ./... -v
 - ✅ URL parsing logic
 - ✅ JSON response parsing
 - ✅ Proxy handler logic (preserved variables, has operator)
-- ⚠️ Full integration tests require Node.js 18-20 (Jest compatibility issue with Node.js v25+)
+- ⚠️ Full integration tests require Node.js 18-20 (Jest compatibility issue with Node.js v22+)
 
 **Run tests:**
 ```bash
@@ -189,7 +189,7 @@ cd SDKs/not-env-sdk-js
 npm test
 ```
 
-**Note:** SDK tests have a known issue with Node.js v25+ and Jest's localStorage initialization. The test logic is correct and tests pass on Node.js 18-20.
+**Note:** SDK tests have a known issue with Node.js v22+ and Jest's localStorage initialization. The test logic is correct and tests pass on Node.js 18-20.
 
 ### ✅ Python SDK Tests - ALL PASSING
 
@@ -238,7 +238,7 @@ cd SDKs/not-env-sdk-js
 npm test
 ```
 
-**Note:** Requires Node.js 18-20 due to Jest compatibility with Node.js v25+.
+**Note:** Requires Node.js 18-20 due to Jest compatibility with Node.js v22+.
 
 **Coverage:** Proxy logic, URL/JSON parsing, preserved variables
 
@@ -310,5 +310,5 @@ python -c "import not_env_sdk.register; import os; print(os.environ)"
 
 ## Known Issues
 
-- **JavaScript SDK**: Node.js v25+ has Jest compatibility issues. Use Node.js 18-20 for tests.
+- **JavaScript SDK**: Node.js v22+ has Jest compatibility issues. Use Node.js 18-20 for tests.
 - **Integration Tests**: Require manual backend setup. Consider testcontainers for automation.

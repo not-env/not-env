@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Documentation
+*.md
+!not-env-backend/README.md
+!not-env-frontend/README.md
+
+# Development
+.env*
+.vscode
+.idea
+*.log
+
+# Node modules (will be installed during build)
+not-env-frontend/node_modules
+SDKs/
+
+# Build artifacts
+not-env-frontend/.next
+not-env-frontend/out
+not-env-backend/not-env-backend
+
+# Tests
+**/test*
+**/*_test.go
+**/jest.config*
+**/__pycache__
+
+# CI/CD
+.github
+

@@ -1,0 +1,89 @@
+# Standalone Dockerfile - Backend + Frontend
+# Supports SQLite (default) or external PostgreSQL/MySQL
+
+# ================================
+# Stage 1: Build Go Backend
+# ================================
+FROM golang:1.24-alpine3.21 AS backend-builder
+
+WORKDIR /app
+
+# Install build dependencies for CGO (required for SQLite)
+RUN apk add --no-cache gcc musl-dev
+
+# Copy backend source
+COPY not-env-backend/go.mod not-env-backend/go.sum ./
+RUN go mod download
+
+COPY not-env-backend/ .
+
+# Build arguments
+ARG VERSION=0.1.0
+
+# Build with CGO enabled for SQLite support
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-X main.version=$VERSION" -a -installsuffix cgo -o not-env-backend .
+
+# ================================
+# Stage 2: Build Next.js Frontend
+# ================================
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /app
+
+# Copy frontend package files
+COPY not-env-frontend/package.json not-env-frontend/package-lock.json ./
+RUN npm ci
+
+# Copy frontend source and build
+COPY not-env-frontend/ .
+RUN npm run build
+
+# ================================
+# Stage 3: Runtime
+# ================================
+FROM alpine:3.21
+
+# Install runtime dependencies
+RUN apk --no-cache add ca-certificates sqlite nodejs wget
+
+WORKDIR /app
+
+# Create data directory for SQLite database
+RUN mkdir -p /data && chmod 755 /data
+
+# Copy backend binary
+COPY --from=backend-builder /app/not-env-backend ./backend/
+
+# Copy frontend standalone build
+COPY --from=frontend-builder /app/.next/standalone ./frontend/
+COPY --from=frontend-builder /app/.next/static ./frontend/.next/static
+COPY --from=frontend-builder /app/public ./frontend/public
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Backend environment variables (defaults for SQLite)
+# NOT_ENV_MASTER_KEY is auto-generated on first startup - save it from logs!
+# You MUST provide it on subsequent startups or you'll lose access to encrypted data
+ENV DB_TYPE=sqlite
+ENV DB_PATH=/data/not-env.db
+
+# Frontend environment variables
+# SESSION_SECRET must be consistent across restarts. Generate once and save:
+#   openssl rand -hex 32
+# Save the output from this and use it for your session secret
+# Then use: -e SESSION_SECRET=[your-session-secret]
+ENV NEXT_PUBLIC_API_URL=http://localhost:1212
+ENV NODE_ENV=production
+ENV DISABLE_SECURE_COOKIE=true
+
+# Expose ports
+EXPOSE 1212 3000
+
+# Healthcheck - checks both backend and frontend
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget -q --spider http://localhost:1212/health && wget -q --spider http://localhost:3000 || exit 1
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
